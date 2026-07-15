@@ -25,26 +25,28 @@ class Bot(commands.Bot):
         intents = discord.Intents.all()
         
         self.start_time = datetime.datetime.now()
+        
         super().__init__(
             command_prefix=config.pop('command_prefix', ['!', '?']),
             description=config.pop('description', None),
             intents=intents
         )
-        self.config = kwargs['config']
+        
+        self.config = config
         self.logger = set_logger(self)
     
     async def setup_hook(self) -> None:
         self.loop.create_task(self.load_cogs())     
 
     async def load_cogs(self) -> None:
-        """
-        Loads all cogs in folder.
-        """
         await self.wait_until_ready()
+        
         await asyncio.sleep(0.1)
+        
         loaded_cogs = []
         failed_cogs = []
         cogs_directory = pathlib.Path('./cogs')
+        
         for cog in cogs_directory.iterdir():
             cog_name = cog.name
             success = False
@@ -119,6 +121,7 @@ def set_logger(bot:commands.Bot) -> Logger:
 
 def start_bot(config) -> None:
     bot = Bot(config)
+    
     bot.run(config.pop('token'), log_handler=None)
 
 if __name__ == '__main__':
