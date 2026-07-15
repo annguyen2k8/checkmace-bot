@@ -1,0 +1,8 @@
+{
+    "command_prefix": [
+        "!", "?"
+    ],
+    "token": "<token>",
+    "description": "I'm a example bot!",
+    "embed_color": null
+}
