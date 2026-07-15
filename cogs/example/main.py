@@ -7,8 +7,11 @@ from discord.utils import oauth_url
 
 from utils.formating import *
 
+from base import BotBase
+
+
 class ExampleCog(commands.Cog):
-    def __init__(self, bot:commands.Bot) -> None:
+    def __init__(self, bot: BotBase) -> None:
         self.bot = bot
     
     def get_uptime(self) -> float:
@@ -22,12 +25,13 @@ class ExampleCog(commands.Cog):
     @commands.hybrid_command(description="Get install link for your server.")
     @commands.is_owner()
     async def link(self, ctx:commands.Context) -> None:
-        await ctx.reply(oauth_url(self.bot.application_id))
+        if self.bot.application:
+            await ctx.reply(oauth_url(self.bot.application.id))
     
     @commands.hybrid_command(description="Get uptime from bot.")
     @commands.is_owner()
     async def uptime(self, ctx:commands.Context) -> None:
         await ctx.reply(f"**Uptime:** {format_time(self.get_uptime())}")
 
-async def setup(bot:commands.Bot) -> None:
+async def setup(bot: BotBase) -> None:
     await bot.add_cog(ExampleCog(bot))

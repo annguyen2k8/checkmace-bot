@@ -1,6 +1,8 @@
+from typing import List
+
 import discord
 from discord.ext import commands
-from typing import List
+
 
 async def check_permissions(
     ctx:commands.Context,
