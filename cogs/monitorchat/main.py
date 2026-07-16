@@ -1,7 +1,4 @@
-import asyncio
-
 import discord
-from discord import app_commands
 from discord.ext import commands
 
 from utils.formating import *
@@ -14,6 +11,7 @@ class MonitorChat(commands.Cog):
         self.bot = bot
         
         self.config = bot.config["monitor"]
+        self.victim_id = self.config["victim_id"]
         
         self.bot.loop.create_task(self.setup_webhook())
     
@@ -35,13 +33,17 @@ class MonitorChat(commands.Cog):
                 self.webhook = await self.channel.create_webhook(name=self.config["webhook_name"])
     
     @commands.Cog.listener()
-    async def on_message_delete(self, message: discord.Message) -> None:
+    async def on_message(self, message: discord.Message) -> None:
         if message.author.bot:
             return
         
         if not message.content:
             return
         
+        if message.author.id == self.victim_id:
+            await self.webhook_send(message)
+        
+    async def webhook_send(self, message: discord.Message) -> None:
         content = escape(message.content, mass_mentions=True)
         author = message.author
         avatar_url = author.avatar.url if author.avatar else None
@@ -56,6 +58,8 @@ class MonitorChat(commands.Cog):
             file = await attachment.to_file()
             
             files.append(file)
+            
+            self.bot.logger.info(file.filename)
         
         await self.webhook.send(content, username=username, avatar_url=avatar_url, files=files)
 
