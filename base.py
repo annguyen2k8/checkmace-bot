@@ -42,24 +42,23 @@ class BotBase(commands.Bot):
         cogs_directory = pathlib.Path('./cogs')
         
         for folder in cogs_directory.iterdir():
-            
-            success = False
-            while not success:
-                try:
-                    await self.load_extension(f'cogs.{folder.name}.main')
-                    
-                    cog_name = self.cogs[folder.name]
-                    
-                    self.logger.info(f"Loaded {cog_name}")
-                    
-                    loaded_cogs.append(cog_name)
-                    success = True
-                    
-                except Exception as e:
-                    self.logger.error(f"Error to load {cog_name} cog")
-                    failed_cogs.append(cog_name)
-                    self.logger.exception(e)
-                    await asyncio.sleep(5)
+            try:
+                cog_name = f"cogs.{folder.name}.main"
+                
+                await self.load_extension(cog_name)
+                
+                loaded_cogs.append(cog_name)
+                success = True
+                
+            except Exception as e:
+                self.logger.error(f"Error to load {cog_name} cog")
+                self.logger.exception(e)
+                
+                failed_cogs.append(cog_name)
+                
+                await asyncio.sleep(5)
+        
+        self.logger.info(f"Loaded {len(loaded_cogs)} cogs ({len(failed_cogs)} failed)")
         
         await self.sync_commands()
     
