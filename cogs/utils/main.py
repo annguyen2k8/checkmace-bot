@@ -10,7 +10,7 @@ from utils.formating import *
 from base import BotBase
 
 
-class ExampleCog(commands.Cog):
+class Utils(commands.Cog):
     def __init__(self, bot: BotBase) -> None:
         self.bot = bot
     
@@ -34,4 +34,4 @@ class ExampleCog(commands.Cog):
         await ctx.reply(f"**Uptime:** {format_time(self.get_uptime())}")
 
 async def setup(bot: BotBase) -> None:
-    await bot.add_cog(ExampleCog(bot))
+    await bot.add_cog(Utils(bot))

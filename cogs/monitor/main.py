@@ -9,7 +9,7 @@ from utils.formating import *
 from base import BotBase
 
 
-class MonitorCog(commands.Cog):
+class MonitorChat(commands.Cog):
     def __init__(self, bot: BotBase) -> None:
         self.bot = bot
         
@@ -52,4 +52,4 @@ class MonitorCog(commands.Cog):
             
 
 async def setup(bot: BotBase) -> None:
-    await bot.add_cog(MonitorCog(bot))
+    await bot.add_cog(MonitorChat(bot))
