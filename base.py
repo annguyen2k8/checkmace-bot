@@ -41,15 +41,20 @@ class BotBase(commands.Bot):
         failed_cogs = []
         cogs_directory = pathlib.Path('./cogs')
         
-        for cog in cogs_directory.iterdir():
-            cog_name = cog.name
+        for folder in cogs_directory.iterdir():
+            
             success = False
             while not success:
                 try:
-                    await self.load_extension(f'cogs.{cog_name}.main')
-                    loaded_cogs.append(cog_name)
+                    await self.load_extension(f'cogs.{folder.name}.main')
+                    
+                    cog_name = self.cogs[folder.name]
+                    
                     self.logger.info(f"Loaded {cog_name}")
+                    
+                    loaded_cogs.append(cog_name)
                     success = True
+                    
                 except Exception as e:
                     self.logger.error(f"Error to load {cog_name} cog")
                     failed_cogs.append(cog_name)

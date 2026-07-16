@@ -39,6 +39,9 @@ class MonitorChat(commands.Cog):
         if message.author.bot:
             return
         
+        if not message.content:
+            return
+        
         author = message.author
         avatar_url = author.avatar.url if author.avatar else None
         
