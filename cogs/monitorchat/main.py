@@ -53,7 +53,9 @@ class MonitorChat(commands.Cog):
             username = author.display_name
         
         for attachment in message.attachments:
-            files.append(await attachment.to_file())
+            file = await attachment.to_file()
+            
+            files.append(file)
         
         await self.webhook.send(content, username=username, avatar_url=avatar_url, files=files)
 
