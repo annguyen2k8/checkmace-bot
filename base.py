@@ -48,7 +48,7 @@ class BotBase(commands.Bot):
                 try:
                     await self.load_extension(f'cogs.{cog_name}.main')
                     loaded_cogs.append(cog_name)
-                    self.logger.info(f"Loaded {cog_name}'s cog")
+                    self.logger.info(f"Loaded {cog_name}")
                     success = True
                 except Exception as e:
                     self.logger.error(f"Error to load {cog_name} cog")
@@ -70,7 +70,7 @@ class BotBase(commands.Bot):
         elapsed_time = now - self.start_time
         
         if self.application:
-            self.logger.info(f"Logged bot's {self.user} (ID: {self.application.id})")
+            self.logger.info(f"Logged bot {self.user} (ID: {self.application.id})")
         
         self.logger.info(f"Took {round(elapsed_time.total_seconds()*1000)}ms to start")
 
