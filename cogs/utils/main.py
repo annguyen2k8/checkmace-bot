@@ -3,9 +3,8 @@ import datetime
 from discord.ext import commands
 from discord.utils import oauth_url
 
-from utils.formating import *
-
 from base import BotBase
+from utils.formating import *
 
 
 class Utils(commands.Cog):

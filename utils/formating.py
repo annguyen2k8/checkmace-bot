@@ -1,19 +1,22 @@
-def bold(text:str) -> str:
+from typing import Any
+
+
+def bold(text: Any) -> str:
     return "**{}**".format(text)
 
-def box(text:str, lang="") -> str:
+def box(text: Any, lang="") -> str:
     return "```{}\n{}\n```".format(lang, text)
 
-def inline(text:str) -> str:
+def inline(text: Any) -> str:
     return "`{}`".format(text)
 
-def italics(text:str) -> str:
+def italics(text: Any) -> str:
     return "*{}*".format(text)
 
-def strikethrough(text:str) -> str:
+def strikethrough(text: Any) -> str:
     return "~~{}~~".format(text)
 
-def underline(text:str) -> str:
+def underline(text: Any) -> str:
     return "__{}__".format(text)
 
 def escape(text, *, mass_mentions=False, formatting=False) -> str:

@@ -1,9 +1,8 @@
-import discord
+from discord import Member, Message, TextChannel
 from discord.ext import commands
 
-from utils.formating import *
-
 from base import BotBase
+from utils.formating import *
 
 
 class MonitorChat(commands.Cog):
@@ -18,22 +17,22 @@ class MonitorChat(commands.Cog):
     async def setup_webhook(self) -> None:
         self.channel = self.bot.get_channel(self.config["channel_id"])
         
-        if self.channel and isinstance(self.channel, discord.TextChannel):
+        if self.channel and isinstance(self.channel, TextChannel):
             webhooks = await self.channel.webhooks()
 
             existing = None
             for wh in webhooks:
-                if wh.name == self.config.get("webhook_name"):
+                if wh.name == self.bot.config.get("webhook_name"):
                     existing = wh
                     break
 
             if existing:
                 self.webhook = existing
             else:
-                self.webhook = await self.channel.create_webhook(name=self.config["webhook_name"])
+                self.webhook = await self.channel.create_webhook(name=self.bot.config["webhook_name"])
     
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message) -> None:
+    async def on_message(self, message: Message) -> None:
         if message.author.bot:
             return
         
@@ -43,7 +42,7 @@ class MonitorChat(commands.Cog):
         if message.author.id == self.victim_id:
             await self.webhook_send(message)
         
-    async def webhook_send(self, message: discord.Message) -> None:
+    async def webhook_send(self, message: Message) -> None:
         content = escape(message.content, mass_mentions=True)
         author = message.author
         avatar_url = author.avatar.url if author.avatar else None
@@ -51,7 +50,7 @@ class MonitorChat(commands.Cog):
         
         files = []
         
-        if isinstance(author, discord.Member):
+        if isinstance(author, Member):
             username = author.display_name
         
         for attachment in message.attachments:

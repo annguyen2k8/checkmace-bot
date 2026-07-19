@@ -29,6 +29,7 @@ class BotBase(commands.Bot):
         self.config = config
         self.logger = set_logger(self)
     
+    
     async def setup_hook(self) -> None:
         self.loop.create_task(self.load_cogs())     
 
@@ -48,7 +49,6 @@ class BotBase(commands.Bot):
                 await self.load_extension(cog_name)
                 
                 loaded_cogs.append(cog_name)
-                success = True
                 
             except Exception as e:
                 self.logger.error(f"Error to load {cog_name} cog")
@@ -65,6 +65,7 @@ class BotBase(commands.Bot):
     async def sync_commands(self) -> None:
         try:
             sync = await self.tree.sync()
+            
             self.logger.info(f"Total {len(sync)} slash commands, {len(self.commands)} normal commands")
         except Exception as error:
             self.logger.error(error)
@@ -81,6 +82,10 @@ class BotBase(commands.Bot):
     async def on_command_error(self, ctx:commands.Context, error:commands.errors.CommandError):
         if isinstance(error, commands.MissingPermissions):
             return await ctx.send("You don't have permission to use this command")
+        
+        if ctx.author.id == self.owner_id:
+            return await ctx.send(box(error))
+        
         self.logger.exception(error)
         
         # owner = self.application.owner
