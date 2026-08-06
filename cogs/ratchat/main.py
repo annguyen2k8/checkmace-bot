@@ -14,8 +14,6 @@ class RatChat(AbstractCog):
     emojis: Dict[str, Emoji]
     def __init__(self, bot: BotBase) -> None:
         super().__init__(bot)
-        
-        self.config = self.bot.config["ratchat"]
 
     async def cog_load(self) -> None:
         self.emojis = await self.setup_emojis(Path(__file__).parent / "assets" / "emoji")
