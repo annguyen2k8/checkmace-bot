@@ -1,11 +1,12 @@
 from discord import Member, Message, TextChannel
 from discord.ext import commands
 
+from abstracts import AbstractCog
 from base import BotBase
 from utils.formating import *
 
 
-class MonitorChat(commands.Cog):
+class MonitorChat(AbstractCog):
     def __init__(self, bot: BotBase) -> None:
         self.bot = bot
         

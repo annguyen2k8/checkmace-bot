@@ -1,12 +1,13 @@
 import discord
 from discord.ext import commands
 
+from abstracts import AbstractCog
 from base import BotBase
 
 
-class AutoReact(commands.Cog):
+class AutoReact(AbstractCog):
     def __init__(self, bot: BotBase) -> None:
-        self.bot = bot
+        super().__init__(bot)
         
         self.config = self.bot.config["autoreact"]
 

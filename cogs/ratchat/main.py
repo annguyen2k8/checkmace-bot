@@ -1,30 +1,24 @@
-from typing import Any, List, Optional
+from pathlib import Path
+from typing import Dict, List, Optional
 
-from discord import (CategoryChannel, Color, Embed, Interaction, Member,
+from discord import (CategoryChannel, Embed, Emoji, Interaction, Member,
                      TextChannel, VoiceChannel, app_commands)
 from discord.ext import commands
 
+from abstracts import AbstractCog
 from base import BotBase
 from utils.formating import box, escape
 
 
-class RatChat(commands.Cog):
+class RatChat(AbstractCog):
+    emojis: Dict[str, Emoji]
     def __init__(self, bot: BotBase) -> None:
-        self.bot = bot
-        
-        self.embed_color = Color.from_str(self.bot.config["embed_color"])
+        super().__init__(bot)
         
         self.config = self.bot.config["ratchat"]
-        
-        self.emojis = self.config["emojis"]
-    
-    def create_embed(self, 
-        title: Optional[Any] = None, 
-        url: Optional[Any] = None, description: Optional[Any] = None
-        ) -> Embed:
-        return Embed(
-            color=self.embed_color, url=url, description=description
-            )
+
+    async def cog_load(self) -> None:
+        self.emojis = await self.setup_emojis(Path(__file__).parent / "assets" / "emoji")
         
     @app_commands.command()
     @commands.is_owner()
