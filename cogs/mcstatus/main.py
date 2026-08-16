@@ -1,58 +1,88 @@
-import asyncio
-from tempfile import TemporaryFile
-from typing import List
 
+from pathlib import Path
+
+from discord import File
 from discord.ext import commands
-from mcstatus import BedrockServer, JavaServer
-from mcstatus.responses.bedrock import BedrockStatusResponse
-from mcstatus.responses.java import JavaStatusResponse
+from PIL import Image
+from io import BytesIO
 
+from abstracts import AbstractCog
 from base import BotBase
 
+from .server import get_status
+from mcstatus.responses import JavaStatusResponse, JavaStatusPlayers
+import base64
+ASSETS_PATH = Path(__file__).parent.joinpath("assets")
 
-async def handle_java(host: str) -> JavaStatusResponse:
-    server = await JavaServer.async_lookup(host)
-    return await server.async_status()
+IMAGES = {
+    path.stem: Image.open(path) for path in ASSETS_PATH.glob("*.png")
+}
 
-
-async def handle_bedrock(host: str) -> BedrockStatusResponse:
-    server = BedrockServer.lookup(host)
-    return await server.async_status()
-
-
-async def status(host: str) -> JavaStatusResponse | BedrockStatusResponse:
-    tasks: List[asyncio.Task[JavaStatusResponse | BedrockStatusResponse]] = [
-        asyncio.create_task(handle_java(host)),
-        asyncio.create_task(handle_bedrock(host)),
+class StatusIcons:
+    thresholds = [
+        (150 ,  "ping_5"),
+        (300 ,  "ping_4"),
+        (600 ,  "ping_3"),
+        (1000,  "ping_2"),
     ]
+    highping = "ping_1"
+    unreachable = "unreachable"
 
-    try:
-        for task in asyncio.as_completed(tasks):
-            try:
-                result = await task
-            except Exception:
-                continue
-            else:
-                for t in tasks:
-                    if t is not task:
-                        t.cancel()
-                return result
-    finally:
-        for t in tasks:
-            t.cancel()
+    @classmethod
+    def from_latency(cls, latency: float) -> str:
+        for threshold, emoji_name in cls.thresholds:
+            if latency < threshold:
+                return emoji_name
+        
+        return cls.highping
 
-    raise ValueError("No tasks were successful. Is the server offline?")
-
-class MCstatus(commands.Cog):
+class MCstatus(AbstractCog):
+    assets_dir = Path(__file__).parent / "assets"
     def __init__(self, bot: BotBase) -> None:
-        self.bot = bot
+        super().__init__(bot)
+    
+    async def cog_load(self) -> None:
+        self.emojis = await self.setup_emojis(self.assets_dir / "emoji")
     
     @commands.hybrid_command()
-    async def mcstatus(self, ctx: commands.Context, address: str) -> None:
-        response = await status(address)
-        
-        
+    async def mcping(self, ctx: commands.Context, address: str) -> None:
+        failed = False
+        try:
+            response = await get_status(address)
+        except ValueError:
+            failed = True
+            
+        embed = self.create_embed()
 
+        fp = self.assets_dir / "default_icon.png"
+        if isinstance(response, JavaStatusResponse) and response.icon:
+            fp = BytesIO(base64.b64decode(response.icon.split(",")[1]))
+        
+        file = File(fp, "icon.png")
+        
+        embed.set_author(name=address, icon_url=file.uri)
+        
+        if not failed:
+            players = response.players
+            
+            name = f"Players ({players.online}/{players.max})"
+            value = "** **"
+            
+            players = response.players
+            if isinstance(players, JavaStatusPlayers) and players.sample:
+                value = "\n".join(map(lambda p: f"**{p.name}** `{p.uuid}`", players.sample))
+        
+            embed.add_field(name=name, value=value)
+        
+        value = f"{self.emojis[StatusIcons.unreachable]} No connection!"
+        if not failed:
+            latency = response.latency
+            
+            value = f"`{latency:.0f}ms` {self.emojis[StatusIcons.from_latency(latency)]}"
 
+        embed.add_field(name="Latency", value=value)
+        
+        await ctx.reply(embed=embed, file=file)
+        
 async def setup(bot: BotBase) -> None:
     await bot.add_cog(MCstatus(bot))
